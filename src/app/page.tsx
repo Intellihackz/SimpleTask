@@ -7,8 +7,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import Navbar from "@/components/Navbar";
-import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { SignedIn, SignedOut, useUser } from "@clerk/nextjs";
+import { FaTrashAlt } from "react-icons/fa";
 
 interface Task {
   _id: string;
@@ -37,6 +37,7 @@ export default function Home() {
     try {
       const response = await fetch("/api/tasks");
       const data: Task[] = await response.json();
+      console.log(data);
       setTasks(data);
     } catch (error) {
       console.error("Failed to fetch tasks:", error);
@@ -87,6 +88,33 @@ export default function Home() {
     }
   };
 
+  const deleteTask = async (taskId: string) => {
+    try {
+      const response = await fetch(`/api/tasks/${taskId}`, {
+        method: "DELETE",
+      });
+      console.log(response)
+      if (response.ok) {
+        fetchTasks();
+        toast({
+          title: "Success",
+          description: "Task deleted successfully!",
+        });
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || "Failed to delete task");
+        toast({
+          title: "Error",
+          description: "Failed to delete task. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to delete task:", error);
+      setError("Failed to delete task. Please try again.");
+    }
+  };
+
   const TaskSkeleton = () => (
     <div className="space-y-2">
       {[...Array(3)].map((_, index) => (
@@ -129,9 +157,14 @@ export default function Home() {
                       className="bg-secondary p-2 rounded flex justify-between items-center"
                     >
                       <span>{task.title}</span>
-                      <span className="text-sm text-gray-500">
-                        {new Date(task.createdAt).toLocaleDateString()}
-                      </span>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-sm text-gray-500">
+                          {new Date(task.createdAt).toLocaleDateString()}
+                        </span>
+                        <Button variant={"destructive"} onClick={() => deleteTask(task._id)}>
+                          <FaTrashAlt />
+                        </Button>
+                      </div>
                     </li>
                   ))}
                 </ul>
