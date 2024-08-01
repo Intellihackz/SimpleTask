@@ -8,7 +8,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import Navbar from "@/components/Navbar";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
-import { SignedIn, SignedOut } from "@clerk/nextjs";
+import { SignedIn, SignedOut, useUser } from "@clerk/nextjs";
 
 interface Task {
   _id: string;
@@ -21,7 +21,7 @@ export default function Home() {
   const [newTask, setNewTask] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
-  const { user } = useKindeBrowserClient();
+  const { user } = useUser();
   const { toast } = useToast();
 
   useEffect(() => {
