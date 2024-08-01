@@ -1,26 +1,25 @@
 import clientPromise from '../../../lib/mongo';
 import { NextRequest, NextResponse } from 'next/server';
-import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
+import { getAuth } from '@clerk/nextjs/server';
 
-export async function GET() {
-  const { getUser } = getKindeServerSession();
-  const user = await getUser();
+export async function GET( request: NextRequest) {
+  const { userId } = await getAuth( request);
 
-  if (!user || !user.id) {
+  if (!userId) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
 
   const client = await clientPromise;
   const db = client.db("taskmanager");
-  const tasks = await db.collection("tasks").find({ userId: user.id }).toArray();
+  const tasks = await db.collection("tasks").find({ userId }).toArray();
   return NextResponse.json(tasks);
 }
 
 export async function POST(request: NextRequest) {
-  const { getUser } = getKindeServerSession();
-  const user = await getUser();
+  const { userId } = await getAuth(request);
+//   console.log(userId);
 
-  if (!user || !user.id) {
+  if (!userId) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
 
@@ -36,7 +35,7 @@ export async function POST(request: NextRequest) {
 
   // Check if the task already exists for this user
   const existingTask = await db.collection("tasks").findOne({ 
-    userId: user.id, 
+    userId, 
     title: trimmedTitle 
   });
 
@@ -46,7 +45,7 @@ export async function POST(request: NextRequest) {
 
   const result = await db.collection("tasks").insertOne({ 
     title: trimmedTitle, 
-    userId: user.id,
+    userId,
     createdAt: new Date()
   });
 

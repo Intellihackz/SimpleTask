@@ -1,27 +1,25 @@
-import React from 'react';
-import { LoginLink, LogoutLink, useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
+import React from "react";
 import { Button } from "@/components/ui/button";
+import { SignedIn, SignedOut, SignInButton, SignOutButton, UserButton } from "@clerk/nextjs";
 
 const Navbar: React.FC = () => {
-  const { user } = useKindeBrowserClient();
-
   return (
     <nav className="bg-primary text-primary-foreground shadow-md">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <h1 className="text-xl font-bold">SimpleTask</h1>
         <div>
-          {user ? (
-            <>
-              <span className="mr-4">Welcome, {user.given_name || user.email}</span>
-              <LogoutLink>
-                <Button variant="secondary">Log out</Button>
-              </LogoutLink>
-            </>
-          ) : (
-            <LoginLink>
+          <SignedIn>
+            <div className="flex items-center pl-5">
+              <span className="mr-4">
+               <UserButton/>
+              </span>
+            </div>
+          </SignedIn>
+          <SignedOut>
+            <SignInButton>
               <Button variant="secondary">Log in</Button>
-            </LoginLink>
-          )}
+            </SignInButton>
+          </SignedOut>
         </div>
       </div>
     </nav>
